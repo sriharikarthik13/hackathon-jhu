@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ debtor_name }}'s Debt | Squared</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --surface-color: rgba(31, 33, 40, 0.6);
+            --surface-hover: rgba(45, 48, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a5;
+            --accent-purple: #9d4edd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(157, 78, 221, 0.1), transparent 40%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .title-area {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+        }
+
+        .card {
+            background: var(--surface-color);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeUp 0.6s ease forwards;
+        }
+
+        .total-amount-box {
+            text-align: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .total-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-purple);
+            background: linear-gradient(135deg, #c77dff, var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .total-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .debts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .debt-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem 1.2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: background 0.2s;
+        }
+
+        .debt-item:hover {
+            background: rgba(157, 78, 221, 0.05);
+            border-color: rgba(157, 78, 221, 0.2);
+        }
+
+        .debt-reason {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .debt-date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        .debt-amount {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <div class="title-area">
+                <h1 class="title">
+                    <div class="user-dot"></div> {{ debtor_name }}
+                </h1>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Debt Breakdown</span>
+            </div>
+        </header>
+
+        <div class="card">
+            <div class="total-amount-box">
+                <div class="total-label">Total Owed to You</div>
+                <div class="total-amount">${{ "{:,.2f}".format(total_owed) }}</div>
+            </div>
+
+            <div class="debts-list">
+                {% if debts|length > 0 %}
+                <h3 style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Previous Splits</h3>
+                {% for debt in debts %}
+                <div class="debt-item">
+                    <div>
+                        <div class="debt-reason">{{ debt.reason }}</div>
+                        <div class="debt-date">Pending settlement</div>
+                    </div>
+                    <div class="debt-amount">${{ "{:,.2f}".format(debt.amount) }}</div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div style="text-align: center; color: var(--text-secondary); padding: 2rem 0;">
+                    No pending debts found for {{ debtor_name }}.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI Reminder Composer -->
+        <div class="card" style="margin-top: -1rem; padding: 1.5rem; animation-delay: 0.2s;">
+            <h3
+                style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--accent-purple)">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                AI Reminder Composer
+            </h3>
+            <textarea id="reminder_text" rows="4" placeholder="Let AI draft a polite reminder..."
+                style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; color: var(--text-primary); font-size: 1rem; outline: none; font-family: 'Outfit', sans-serif; resize: vertical; transition: border-color 0.3s;"></textarea>
+
+            <!-- Voice playback bar -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <select id="voice_select"
+                        style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-secondary); padding: 0.4rem 0.8rem; font-size: 0.9rem; outline: none; appearance: auto;">
+                        <option value="female-soft" selected>👤 Female (Friendly)</option>
+                        <option value="female-stern">👤 Female (Assertive)</option>
+                    </select>
+                    <button id="btn_listen"
+                        style="background: rgba(157, 78, 221, 0.2); border: 1px solid rgba(157, 78, 221, 0.4); color: var(--accent-purple); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                        ▶️ Play Audio
+                    </button>
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">TTS Engine</span>
+            </div>
+
+            <div style="display: flex; gap: 0.8rem; margin-top: 1rem;">
+                <button id="btn_ai"
+                    style="flex: 1; padding: 0.8rem; background: rgba(157, 78, 221, 0.15); border: 1px solid var(--accent-purple); color: var(--text-primary); border-radius: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;">✨
+                    Draft AI</button>
+                <button id="btn_send_voice"
+                    style="flex: 1; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;">🎙️
+                    Voice</button>
+                <button id="btn_send_text"
+                    style="flex: 1; padding: 0.8rem; background: linear-gradient(135deg, #7b2cbf, var(--accent-purple)); border: none; color: white; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(157, 78, 221, 0.3);">📩
+                    Text</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('btn_ai').addEventListener('click', async () => {
+            const btn = document.getElementById('btn_ai');
+            const textarea = document.getElementById('reminder_text');
+
+            btn.textContent = "Thinking...";
+            btn.style.opacity = "0.7";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/generate_reminder/{{ debtor_name }}');
+                const data = await response.json();
+                textarea.value = data.text;
+                textarea.style.borderColor = "var(--accent-purple)";
+                setTimeout(() => textarea.style.borderColor = "var(--border-color)", 1000);
+            } catch (e) {
+                textarea.value = "Error generating reminder.";
+            } finally {
+                btn.innerHTML = "✨ Draft with AI";
+                btn.style.opacity = "1";
+                btn.disabled = false;
+            }
+        });
+
+        // TTS Engine setup
+        let synthesis = window.speechSynthesis;
+        let voices = [];
+
+        function populateVoiceList() {
+            voices = synthesis.getVoices();
+        }
+
+        populateVoiceList();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+
+        document.getElementById('btn_listen').addEventListener('click', () => {
+            const text = document.getElementById('reminder_text').value;
+            if (!text.trim()) {
+                alert("Please draft a reminder first to hear it!");
+                return;
+            }
+
+            synthesis.cancel(); // Stop playing if currently reading
+            let utterance = new SpeechSynthesisUtterance(text);
+            const voicePref = document.getElementById('voice_select').value;
+
+            const isFemale = voicePref.includes('female');
+            const isStern = voicePref.includes('stern');
+
+            // Search for Mac/Windows default voice keywords
+            const femaleKeywords = ['female', 'woman', 'samantha', 'victoria', 'zira', 'tessa', 'karen', 'moira', 'siri'];
+            const maleKeywords = ['male', 'man', 'alex', 'daniel', 'david', 'fred', 'aaron', 'arthur'];
+
+            let selectedVoice = voices.find(v => {
+                let name = v.name.toLowerCase();
+                if (isFemale) return femaleKeywords.some(k => name.includes(k));
+                else return maleKeywords.some(k => name.includes(k));
+            });
+
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            if (isStern) {
+                utterance.pitch = 0.6;
+                utterance.rate = 1.1;
+                if (!isFemale && voices.find(v => v.name === 'Fred')) {
+                    utterance.voice = voices.find(v => v.name === 'Fred');
+                    utterance.pitch = 1.0;
+                }
+            } else {
+                utterance.pitch = 1.2;
+                utterance.rate = 0.95;
+            }
+
+            synthesis.speak(utterance);
+        });
+
+        document.getElementById('btn_send_voice').addEventListener('click', () => {
+            const textarea = document.getElementById('reminder_text');
+            if (textarea.value.trim() === '') {
+                alert("Please write or generate a message first!");
+                return;
+            }
+            synthesis.cancel();
+            alert("Voice recording successfully sent to {{ debtor_name }}! 🎙️");
+            textarea.value = '';
+        });
+
+        document.getElementById('btn_send_text').addEventListener('click', () => {
+            const textarea = document.getElementById('reminder_text');
+            if (textarea.value.trim() === '') {
+                alert("Please write or generate a message first!");
+                return;
+            }
+            synthesis.cancel();
+            alert("Text message successfully sent to {{ debtor_name }}! 📩");
+            textarea.value = '';
+        });
+    </script>
+</body>
+
+</html>

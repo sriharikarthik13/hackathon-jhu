@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split Bill | Squared</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --surface-color: rgba(31, 33, 40, 0.6);
+            --surface-hover: rgba(45, 48, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a5;
+            --accent-blue: #00f2fe;
+            --accent-blue-dark: #4facfe;
+            --accent-purple: #9d4edd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 85% 15%, rgba(157, 78, 221, 0.15), transparent 30%),
+                radial-gradient(circle at 15% 85%, rgba(79, 172, 254, 0.1), transparent 30%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 4rem 2rem;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .greeting {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue-dark), var(--accent-blue));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0;
+            margin-top: -1rem;
+        }
+
+        .tab {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.5rem 0 1rem 0;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--accent-blue);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 2px 2px 0 0;
+            box-shadow: var(--accent-blue);
+        }
+
+        .split-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-card {
+            background: var(--surface-color);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem 2.5rem;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 1.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255, 255, 255, 0.08), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .option-card:hover::before {
+            opacity: 1;
+        }
+
+        .option-card:hover {
+            background: var(--surface-hover);
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .option-card.active {
+            border-color: var(--accent-purple);
+            background: rgba(157, 78, 221, 0.05);
+            box-shadow: 0 0 0 2px var(--accent-purple);
+        }
+
+        .option-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(157, 78, 221, 0.1);
+            color: var(--accent-purple);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+
+        .option-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .option-content {
+            flex: 1;
+            z-index: 2;
+        }
+
+        .option-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .option-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .arrow-icon {
+            color: var(--text-secondary);
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s, color 0.3s;
+            z-index: 2;
+        }
+
+        .option-card:hover .arrow-icon {
+            transform: translateX(10px);
+            color: var(--text-primary);
+        }
+
+        /* Form section */
+        .manual-form {
+            display: none;
+            background: var(--surface-color);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2.5rem;
+            animation: fadeUp 0.4s ease;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.1);
+        }
+
+        .split-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            margin-bottom: 1.5rem;
+        }
+
+        .split-user {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .split-user-name {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+        }
+
+        .user-dot.active {
+            background: var(--accent-purple);
+        }
+
+        .split-percentage {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: auto;
+        }
+
+        .split-percentage input {
+            padding: 0.5rem;
+            text-align: right;
+            -moz-appearance: textfield;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .split-percentage input::-webkit-outer-spin-button,
+        .split-percentage input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1.2rem;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: none;
+            background: linear-gradient(135deg, #7b2cbf, var(--accent-purple));
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(157, 78, 221, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            box-shadow: 0 12px 25px rgba(157, 78, 221, 0.5);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .split-options {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div>
+                <h1 class="greeting">Hello, {{ user.name if user else 'Priya' }}</h1>
+                <p style="color: var(--text-secondary); margin-top: 0.25rem;">Easily split bills with friends.</p>
+            </div>
+            <div class="user-profile">{{ user.name[0] if user else 'P' }}</div>
+        </header>
+
+        <div class="tabs">
+            <a href="/" class="tab">Dashboard</a>
+            <a href="/payment" class="tab">Payment</a>
+            <a href="/split" class="tab active">Split Bill</a>
+        </div>
+
+        <div class="split-options">
+            <!-- Upload Bill -->
+            <div class="option-card" onclick="selectOption('upload')">
+                <div class="option-icon" style="background: rgba(0, 242, 254, 0.1); color: var(--accent-blue);">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                </div>
+                <div class="option-content">
+                    <div class="option-title">Upload a Bill</div>
+                    <div class="option-desc">Scan a receipt automatically using camera layout</div>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+
+            <!-- Voice Entry -->
+            <div class="option-card" id="voice-card" onclick="selectOption('voice')">
+                <div class="option-icon" style="background: rgba(255, 8, 104, 0.1); color: var(--accent-red);">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                </div>
+                <div class="option-content">
+                    <div class="option-title">Voice Command</div>
+                    <div class="option-desc">"I paid $40 for dinner with Harry"</div>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+
+            <!-- Manual Entry -->
+            <div class="option-card" id="manual-card" onclick="selectOption('manual')">
+                <div class="option-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                </div>
+                <div class="option-content">
+                    <div class="option-title">Manual Entry</div>
+                    <div class="option-desc">Type amount and easily choose friends</div>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="manual-form" id="manual-form">
+            <h2 style="margin-bottom: 1.5rem;">Manual Split Entry</h2>
+
+            <form action="/split" method="POST">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 0.4;">
+                        <label>Total Amount ($)</label>
+                        <input type="number" id="total_amount" name="amount" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Reason / Details</label>
+                        <input type="text" name="reason" placeholder="e.g. Dinner at Nando's..." required>
+                    </div>
+                </div>
+
+                <label style="display: block; margin-bottom: 1rem;">Who's splitting?</label>
+                <div class="split-list">
+                    <div class="split-user">
+                        <div class="split-user-name">
+                            <div class="user-dot active"></div> Harry
+                        </div>
+                        <div class="split-percentage">
+                            <input type="number" name="pct_Harry" class="split-pct" min="0" max="100" value="33.3"
+                                step="0.1" style="width: 70px;">
+                            <span style="color: var(--text-secondary); margin-right: 1rem;">%</span>
+                            <span class="user-amount"
+                                style="color: var(--accent-purple); font-weight: 600; min-width: 60px; text-align: right;">$0.00</span>
+                        </div>
+                    </div>
+                    <div class="split-user">
+                        <div class="split-user-name">
+                            <div class="user-dot active"></div> Ron
+                        </div>
+                        <div class="split-percentage">
+                            <input type="number" name="pct_Ron" class="split-pct" min="0" max="100" value="33.3"
+                                step="0.1" style="width: 70px;">
+                            <span style="color: var(--text-secondary); margin-right: 1rem;">%</span>
+                            <span class="user-amount"
+                                style="color: var(--accent-purple); font-weight: 600; min-width: 60px; text-align: right;">$0.00</span>
+                        </div>
+                    </div>
+                    <div class="split-user">
+                        <div class="split-user-name">
+                            <div class="user-dot active"></div> Emma
+                        </div>
+                        <div class="split-percentage">
+                            <input type="number" name="pct_Emma" class="split-pct" min="0" max="100" value="33.4"
+                                step="0.1" style="width: 70px;">
+                            <span style="color: var(--text-secondary); margin-right: 1rem;">%</span>
+                            <span class="user-amount"
+                                style="color: var(--accent-purple); font-weight: 600; min-width: 60px; text-align: right;">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Confirm Split</button>
+            </form>
+        </div>
+
+        <!-- VOICE FORM -->
+        <div class="voice-form" id="voice-form" style="display: none;">
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">Voice Command Entry</h2>
+
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 2rem; padding: 2rem 0;">
+                <div id="mic-btn"
+                    style="width: 100px; height: 100px; border-radius: 50%; background: rgba(157, 78, 221, 0.1); border: 2px solid var(--accent-purple); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(157,78,221,0.2);">
+                    <!-- Mic icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="40"
+                        height="40" stroke="currentColor" stroke-width="0" style="color: var(--accent-purple);">
+                        <path
+                            d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z" />
+                    </svg>
+                </div>
+                <div id="voice-status"
+                    style="font-size: 1.1rem; color: var(--text-secondary); text-align: center; max-width: 300px;">
+                    Tap the microphone to start speaking...<br>
+                    <span style="font-size: 0.9rem; color: gray;">(e.g., "Add 45 dollars for Emma for dinner")</span>
+                </div>
+            </div>
+
+            <!-- Pre-populated form after parsing voice -->
+            <form action="/voice_split" method="POST" id="voice-post-form"
+                style="display: none; background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--accent-purple);">
+                <h3 style="margin-bottom: 1.5rem; color: var(--accent-purple); font-size: 1.1rem;">Parsed Details <span
+                        style="color:var(--text-secondary); font-size:0.8rem; font-weight:normal;">(Edit if
+                        needed)</span></h3>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 0.4;">
+                        <label>Friend</label>
+                        <select name="debtor_name" id="voice_name" required
+                            style="width: 100%; background: #121318; border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; color: var(--text-primary); font-size: 1.1rem; outline: none;">
+                            <option value="Harry">Harry</option>
+                            <option value="Ron">Ron</option>
+                            <option value="Emma">Emma</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 0.4;">
+                        <label>Amount ($)</label>
+                        <input type="number" id="voice_amount" name="amount" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                    <label>Reason</label>
+                    <input type="text" id="voice_reason" name="reason" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Save Split</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function selectOption(opt) {
+            // Remove active classes
+            document.querySelectorAll('.option-card').forEach(el => el.classList.remove('active'));
+
+            if (opt === 'manual') {
+                document.getElementById('manual-card').classList.add('active');
+                document.getElementById('manual-form').style.display = 'block';
+                document.getElementById('voice-form').style.display = 'none';
+            } else if (opt === 'voice') {
+                document.getElementById('voice-card').classList.add('active');
+                document.getElementById('manual-form').style.display = 'none';
+                document.getElementById('voice-form').style.display = 'block';
+            } else {
+                event.currentTarget.classList.add('active');
+                document.getElementById('manual-form').style.display = 'none';
+                document.getElementById('voice-form').style.display = 'none';
+
+                // Upload feature alert
+                alert('This feature (Upload a Bill) is coming soon!');
+                setTimeout(() => {
+                    event.target.closest('.option-card').classList.remove('active');
+                }, 500);
+            }
+        }
+
+        // Python Recorder Logic
+        const micBtn = document.getElementById('mic-btn');
+        const voiceStatus = document.getElementById('voice-status');
+        const voicePostForm = document.getElementById('voice-post-form');
+
+        if (micBtn) {
+            micBtn.addEventListener('click', async () => {
+                voicePostForm.style.display = 'none';
+                micBtn.style.background = 'rgba(255, 107, 107, 0.2)';
+                micBtn.style.borderColor = '#ff6b6b';
+                voiceStatus.innerHTML = '<strong style="color: #ff6b6b;">Python Recorder Listening... Speak now!</strong>';
+
+                try {
+                    const response = await fetch('/api/record_python', { method: 'POST' });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        voiceStatus.innerHTML = `Heard: "<i style="color:white;">${data.transcript}</i>"`;
+                        document.getElementById('voice_name').value = data.name;
+                        document.getElementById('voice_amount').value = data.amount;
+                        document.getElementById('voice_reason').value = data.reason;
+                        voicePostForm.style.display = 'block';
+                    } else {
+                        voiceStatus.innerHTML = `Backend error: <b>${data.error}</b>`;
+                    }
+                } catch (err) {
+                    voiceStatus.innerHTML = `Failed to contact backend recorder. Is the server running?`;
+                }
+
+                micBtn.style.background = 'rgba(157, 78, 221, 0.1)';
+                micBtn.style.borderColor = 'var(--accent-purple)';
+            });
+        }
+
+        const totalAmountInput = document.getElementById('total_amount');
+        const splitPctInputs = Array.from(document.querySelectorAll('.split-pct'));
+
+        function updateSplitAmounts() {
+            const total = parseFloat(totalAmountInput.value) || 0;
+            splitPctInputs.forEach(input => {
+                const pct = parseFloat(input.value) || 0;
+                const amt = total * (pct / 100);
+                const amtSpan = input.closest('.split-percentage').querySelector('.user-amount');
+                amtSpan.textContent = `$${amt.toFixed(2)}`;
+            });
+        }
+
+        function handleAutoSplit(e) {
+            const changedInput = e.target;
+            const changedValue = parseFloat(changedInput.value) || 0;
+            const validChangedValue = Math.min(100, Math.max(0, changedValue));
+            const remaining = 100 - validChangedValue;
+
+            const others = splitPctInputs.filter(input => input !== changedInput);
+            if (others.length > 0) {
+                const splitShare = remaining / others.length;
+                let sumDistributed = 0;
+                others.forEach((otherInput, index) => {
+                    if (index === others.length - 1) {
+                        const lastShare = remaining - sumDistributed;
+                        otherInput.value = Math.max(0, lastShare).toFixed(1);
+                    } else {
+                        const share = parseFloat(splitShare.toFixed(1));
+                        otherInput.value = Math.max(0, share).toFixed(1);
+                        sumDistributed += share;
+                    }
+                });
+            }
+            updateSplitAmounts();
+        }
+
+        totalAmountInput.addEventListener('input', updateSplitAmounts);
+        splitPctInputs.forEach(input => {
+            input.addEventListener('input', handleAutoSplit);
+        });
+
+        // init
+        updateSplitAmounts();
+    </script>
+</body>
+
+</html>

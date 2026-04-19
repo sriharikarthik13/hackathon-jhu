@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments | Squared</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --surface-color: rgba(31, 33, 40, 0.6);
+            --surface-hover: rgba(45, 48, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a5;
+            --accent-blue: #00f2fe;
+            --accent-blue-dark: #4facfe;
+            --accent-green: #00ff87;
+            --accent-green-dark: #60efff;
+            --accent-red: #ff0844;
+            --accent-red-dark: #ffb199;
+            --accent-purple: #9d4edd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(79, 172, 254, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 255, 135, 0.1), transparent 25%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .greeting {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue-dark), var(--accent-blue));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0;
+            margin-top: -1rem;
+        }
+
+        .tab {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.5rem 0 1rem 0;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--accent-blue);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 2px 2px 0 0;
+            box-shadow: 0 -2px 10px rgba(79, 172, 254, 0.5);
+        }
+
+        /* Large Payment Bars */
+        .payment-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .pay-bar {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem 2.5rem;
+            background: var(--surface-color);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pay-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255, 255, 255, 0.08), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .pay-bar:hover::before {
+            opacity: 1;
+        }
+
+        .pay-bar:hover {
+            transform: translateY(-5px);
+            background: var(--surface-hover);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .pay-bar-content {
+            flex: 1;
+        }
+
+        .pay-bar-title {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .pay-bar-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .icon-box-large {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+        
+        .icon-box-large svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .bar-send .icon-box-large {
+            background: linear-gradient(135deg, var(--accent-blue-dark), var(--accent-blue));
+            color: #0b0c10;
+        }
+        
+        .bar-request .icon-box-large {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .bar-balance .icon-box-large {
+            background: rgba(0, 255, 135, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .arrow-icon {
+            color: var(--text-secondary);
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        .pay-bar:hover .arrow-icon {
+            transform: translateX(10px);
+            color: var(--text-primary);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard-container > * {
+            animation: fadeUp 0.6s ease forwards;
+            opacity: 0;
+        }
+        
+        .payment-bars .pay-bar:nth-child(1) { animation-delay: 0.2s; animation: fadeUp 0.6s ease forwards; opacity: 0; }
+        .payment-bars .pay-bar:nth-child(2) { animation-delay: 0.3s; animation: fadeUp 0.6s ease forwards; opacity: 0; }
+        .payment-bars .pay-bar:nth-child(3) { animation-delay: 0.4s; animation: fadeUp 0.6s ease forwards; opacity: 0; }
+
+        @media (max-width: 768px) {
+            .pay-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1.5rem;
+            }
+            .pay-bar .arrow-icon {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div>
+                <h1 class="greeting">Payments</h1>
+                <p style="color: var(--text-secondary); margin-top: 0.25rem;">Send or request money seamlessly.</p>
+            </div>
+            <div class="user-profile">{{ user.name[0] }}</div>
+        </header>
+
+        <div class="tabs">
+            <a href="/" class="tab">Dashboard</a>
+            <a href="/payment" class="tab active">Payment</a>
+            <a href="/split" class="tab">Split Bill</a>
+        </div>
+
+        <div class="payment-bars">
+            <!-- Send Payment -->
+            <a href="/send_payment" class="pay-bar bar-send">
+                <div class="icon-box-large">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </div>
+                <div class="pay-bar-content">
+                    <div class="pay-bar-title">Send Payment</div>
+                    <div class="pay-bar-desc">Pay back your friends or settle manual debts</div>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+
+            <!-- Request Money -->
+            <a href="/request_money" class="pay-bar bar-request">
+                <div class="icon-box-large">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                </div>
+                <div class="pay-bar-content">
+                    <div class="pay-bar-title">Request Money</div>
+                    <div class="pay-bar-desc">Ask a friend for cash directly</div>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+
+            <!-- Add Balance -->
+            <a href="/add_balance" class="pay-bar bar-balance">
+                <div class="icon-box-large">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                    </svg>
+                </div>
+                <div class="pay-bar-content">
+                    <div class="pay-bar-title">Add Balance</div>
+                    <div class="pay-bar-desc">Deposit funds from your external bank account</div>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Mouse glowing effect script -->
+    <script>
+        document.querySelectorAll('.pay-bar').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body>
+
+</html>

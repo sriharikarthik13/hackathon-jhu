@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Squared</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --surface-color: rgba(31, 33, 40, 0.6);
+            --surface-hover: rgba(45, 48, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a5;
+            --accent-blue: #00f2fe;
+            --accent-blue-dark: #4facfe;
+            --accent-green: #00ff87;
+            --accent-green-dark: #60efff;
+            --accent-red: #ff0844;
+            --accent-red-dark: #ffb199;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(79, 172, 254, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 255, 135, 0.1), transparent 25%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .greeting {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue-dark), var(--accent-blue));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .user-profile:hover {
+            transform: scale(1.05);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0;
+            margin-top: -1rem;
+        }
+
+        .tab {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.5rem 0 1rem 0;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--accent-blue);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 2px 2px 0 0;
+            box-shadow: 0 -2px 10px rgba(79, 172, 254, 0.5);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--surface-color);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255, 255, 255, 0.06), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            background: var(--surface-hover);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .card-title {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .card-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .currency {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* Specific Card Styles */
+        .card.balance .card-amount {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card.balance .icon-box {
+            background: rgba(79, 172, 254, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .card.owed .card-amount {
+            background: linear-gradient(135deg, var(--accent-green-dark), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card.owed .icon-box {
+            background: rgba(0, 255, 135, 0.1);
+            color: var(--accent-green);
+        }
+
+        .card.due .card-amount {
+            background: linear-gradient(135deg, var(--accent-red-dark), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card.due .icon-box {
+            background: rgba(255, 8, 68, 0.1);
+            color: var(--accent-red);
+        }
+
+        .card-footer {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 2;
+        }
+
+        .trend.up {
+            color: var(--accent-green);
+        }
+
+        .trend.down {
+            color: var(--accent-red);
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 0.75rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue-dark), var(--accent-blue));
+            color: #000;
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.2);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 12px 25px rgba(79, 172, 254, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* SVG Icons */
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-amount {
+                font-size: 2.5rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dashboard-container>* {
+            animation: fadeUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .dashboard-container header {
+            animation-delay: 0.1s;
+        }
+
+        .cards-grid .card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .cards-grid .card:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .cards-grid .card:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .actions {
+            animation-delay: 0.5s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div>
+                <h1 class="greeting">Hello, {{ user.name }}</h1>
+                <p style="color: var(--text-secondary); margin-top: 0.25rem;">Your financial summary at a glance.</p>
+            </div>
+            <div class="user-profile">{{ user.name[0] }}</div>
+        </header>
+
+        <div class="tabs">
+            <a href="/" class="tab active">Dashboard</a>
+            <a href="/payment" class="tab">Payment</a>
+            <a href="/split" class="tab">Split Bill</a>
+        </div>
+
+        <div class="cards-grid">
+            <!-- Balance Card -->
+            <div class="card balance">
+                <div class="card-header">
+                    <span class="card-title">Total Balance</span>
+                    <div class="icon-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-amount">
+                    <span class="currency">$</span>{{ "{:,.2f}".format(user.balance) }}
+                </div>
+                <div class="card-footer">
+                    <span class="trend up">▲ +2.4%</span>
+                    <span>from last month</span>
+                </div>
+            </div>
+
+            <!-- Amount Owed To You -->
+            <div class="card owed">
+                <div class="card-header">
+                    <span class="card-title">People Owe You</span>
+                    <div class="icon-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-amount">
+                    <span class="currency">$</span>{{ "{:,.2f}".format(user.owed_to_you) }}
+                </div>
+                <div class="card-footer" style="display: flex; gap: 0.5rem; align-items: center; padding-top: 0.5rem;">
+                    {% if debtors and debtors|length > 0 %}
+                        {% for debtor in debtors %}
+                            <a href="/debt/{{ debtor }}" title="{{ debtor }}" style="text-decoration: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-purple, #9d4edd); color: white; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 8px rgba(157, 78, 221, 0.4); transition: transform 0.2s;">
+                                {{ debtor[0] | upper }}
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <span style="color: var(--text-secondary)">No pending incoming requests</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Amount You Owe -->
+            <div class="card due">
+                <div class="card-header">
+                    <span class="card-title">You Owe Others</span>
+                    <div class="icon-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 13l-5-5m0 0l-5-5m5 5V6" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-amount">
+                    <span class="currency">$</span>{{ "{:,.2f}".format(user.you_owe) }}
+                </div>
+                <div class="card-footer">
+                    <span style="color: var(--text-secondary)">Payments due in 2 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div class="analytics-section" style="margin-top: 2rem; animation: fadeUp 0.6s ease forwards; animation-delay: 0.5s; opacity: 0;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Analytics</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+                
+                <!-- Debt Bar Chart -->
+                <div class="card" style="padding: 1.5rem;">
+                    <div class="card-header" style="margin-bottom: 1rem;">
+                        <span class="card-title">Who Owes You</span>
+                    </div>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="debtBarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Reason Pie Chart -->
+                <div class="card" style="padding: 1.5rem;">
+                    <div class="card-header" style="margin-bottom: 1rem;">
+                        <span class="card-title">Reasons for Spending</span>
+                    </div>
+                    <div style="position: relative; height: 300px; width: 100%; display: flex; justify-content: center;">
+                        <canvas id="reasonPieChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- Future Analytics Prediction Button Placeholder -->
+            <div style="margin-top: 2.5rem; margin-bottom: 0.5rem; display: flex; justify-content: center;">
+                <button id="btn-predict-analytics" style="padding: 1rem 3rem; background: linear-gradient(135deg, rgba(157, 78, 221, 0.15), rgba(157, 78, 221, 0.3)); border: 1px solid var(--accent-purple); color: var(--text-primary); border-radius: 100px; font-size: 1.1rem; font-family: 'Outfit', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 20px rgba(157, 78, 221, 0.2); display: flex; align-items: center; gap: 0.5rem;">
+                    ✨ Predict Future Analytics
+                </button>
+            </div>
+            
+            <script>
+                const btnPredict = document.getElementById('btn-predict-analytics');
+                if (btnPredict) {
+                    btnPredict.addEventListener('mouseover', () => {
+                        btnPredict.style.transform = 'translateY(-3px) scale(1.02)';
+                        btnPredict.style.boxShadow = '0 8px 30px rgba(157, 78, 221, 0.4)';
+                        btnPredict.style.background = 'linear-gradient(135deg, rgba(157, 78, 221, 0.25), rgba(157, 78, 221, 0.45))';
+                    });
+                    btnPredict.addEventListener('mouseout', () => {
+                        btnPredict.style.transform = 'translateY(0) scale(1)';
+                        btnPredict.style.boxShadow = '0 4px 20px rgba(157, 78, 221, 0.2)';
+                        btnPredict.style.background = 'linear-gradient(135deg, rgba(157, 78, 221, 0.15), rgba(157, 78, 221, 0.3))';
+                    });
+                    btnPredict.addEventListener('click', () => {
+                        btnPredict.innerHTML = 'Analyzing...';
+                        btnPredict.style.opacity = '0.7';
+                        setTimeout(() => {
+                            btnPredict.innerHTML = '✨ Predict Future Analytics';
+                            btnPredict.style.opacity = '1';
+                        }, 2000);
+                    });
+                }
+            </script>
+        </div>
+    </div>
+
+    <!-- Mouse glowing effect script -->
+    <script>
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+
+    <!-- Chart.js Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Set default Chart.js styles to fit our dark UI
+        Chart.defaults.color = '#8b92a5';
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+        
+        // Data passed from backend
+        const chartDebts = {{ chart_debts | tojson | safe }};
+        const chartReasons = {{ chart_reasons | tojson | safe }};
+
+        // 1. Debt Bar Chart
+        const barCtx = document.getElementById('debtBarChart').getContext('2d');
+        const debtLabels = Object.keys(chartDebts);
+        const debtData = Object.values(chartDebts);
+
+        // Colors for Bar chart (Blue, Purple, Green, Pink)
+        const barColorThemes = [
+            { top: 'rgba(0, 242, 254, 0.8)', bottom: 'rgba(79, 172, 254, 0.2)', border: '#00f2fe' },
+            { top: 'rgba(157, 78, 221, 0.8)', bottom: 'rgba(157, 78, 221, 0.2)', border: '#9d4edd' },
+            { top: 'rgba(0, 255, 135, 0.8)', bottom: 'rgba(0, 255, 135, 0.2)', border: '#00ff87' },
+            { top: 'rgba(255, 8, 104, 0.8)', bottom: 'rgba(255, 8, 104, 0.2)', border: '#ff0868' }
+        ];
+
+        let bgColors = [];
+        let borderColors = [];
+        
+        debtLabels.forEach((label, i) => {
+            let theme = barColorThemes[i % barColorThemes.length];
+            let grad = barCtx.createLinearGradient(0, 0, 0, 400);
+            grad.addColorStop(0, theme.top);
+            grad.addColorStop(1, theme.bottom);
+            bgColors.push(grad);
+            borderColors.push(theme.border);
+        });
+
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: debtLabels,
+                datasets: [{
+                    label: 'Amount Owed ($)',
+                    data: debtData,
+                    backgroundColor: bgColors,
+                    borderColor: borderColors,
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: {
+                            callback: function(value) { return '$' + value; }
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // 2. Reason Pie Chart
+        const pieCtx = document.getElementById('reasonPieChart').getContext('2d');
+        const reasonLabels = Object.keys(chartReasons);
+        const reasonData = Object.values(chartReasons);
+
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: reasonLabels,
+                datasets: [{
+                    data: reasonData,
+                    backgroundColor: [
+                        '#9d4edd', // purple
+                        '#00f2fe', // blue
+                        '#00ff87', // green
+                        '#ff0844', // red
+                        '#ffb199', // orange
+                        '#8b92a5'  // gray
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { padding: 20, usePointStyle: true, boxWidth: 8 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed !== null) {
+                                    label += '$' + parseFloat(context.parsed).toFixed(2);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
